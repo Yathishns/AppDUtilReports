@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<appD-HC-report>
+    <server-config> 
+        <controller Port="443" useSSL="true">controlle.saas.appdynamics.com</controller>
+        <account>customer1</account>
+        <user>admin</user>
+        <password>cikendkskFrNxlAN+s+BsL+8V7nKGLo5H</password>
+        <server-log maxNumber="4" maxSize="30">/tmp/server.log</server-log>
+    </server-config>
+    
+    <hc-load-checks>
+        
+        <outputs>
+            <output type="stdout" format="pipe-delimited"/>
+            <output type="file" format="excel">Customer1_HCLoad</output>
+        </outputs>       
+        <load-check-set application="53">
+            
+            <load-check name="bt-check"  enabled="true">
+                <min-count>50</min-count>
+                <min24-count>100</min24-count>
+                <min48-count>150</min48-count>
+            </load-check>
+
+            <load-check name="be-check" enabled="true">
+                <min-count>50</min-count>
+                <min24-count>100</min24-count>
+                <min48-count>150</min48-count>
+            </load-check>
+
+            <load-check name="eum-ajax-check" enabled="true">
+                <min-count>50</min-count>
+                <min24-count>100</min24-count>
+                <min48-count>150</min48-count>
+            </load-check>
+
+            <load-check name="eum-base-page-check" enabled="true">
+                <min-count>50</min-count>
+                <min24-count>100</min24-count>
+                <min48-count>150</min48-count>
+            </load-check>
+
+            <load-check name="eum-iframe-check" enabled="true">
+                <min-count>50</min-count>
+                <min24-count>100</min24-count>
+                <min48-count>150</min48-count>
+            </load-check>
+        </load-check-set>
+        
+    </hc-load-checks>
+</appD-HC-report>

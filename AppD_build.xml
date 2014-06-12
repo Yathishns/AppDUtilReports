@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="AppDUtilReports" default="package" basedir=".">
+    <property name="classes.dir"		value="src"/>
+    <property name="build.dir"			value="appBuild"/>
+    <property name="lib.dir"			value="${basedir}/lib"/> 
+    <property name="exec.lib.dir"		value="${basedir}/execLib"/> 
+    <property name="poi.lib.dir"		value="${basedir}/poiLibs"/>
+    <property name="hloadcheck.main"            value="org.appdynamics.utilreports.ControllerHC"/>
+
+    <property name="AppDynamicsHLoadCheck.basename" value="AppDynamicsHLoadCheck"/>
+    <property name="AppDynamicsHLoadCheck.version"     value="1.0.1"/>
+
+    <loadproperties srcFile="one_time_git.properties"/>    
+    
+    <path id="compile.classpath">
+	<fileset dir="${exec.lib.dir}/">
+	    <include name="*.jar"/>
+	</fileset>
+    </path> 
+
+    <target name="clean">
+	<delete dir="${build.dir}"/>
+	<delete dir="${exec.lib.dir}"/>
+    </target>
+
+    <target name="init" depends="clean">
+	<mkdir dir="${build.dir}"/>
+	<mkdir dir="${exec.lib.dir}"/>
+        <copy todir="${exec.lib.dir}/">
+            <fileset dir="${appd_rest_base}/lib">
+                <include name="*.jar"/>
+            </fileset>  
+            <fileset dir="${poi.lib.dir}/">
+                <include name="*.jar"/>
+            </fileset>  
+            <fileset dir="${lib.dir}/">
+                <include name="*.jar"/>
+            </fileset>  
+        </copy>     
+	<copy file="${appd_rest_base}/appBuild/${appd_rest_jar}"
+              tofile="${exec.lib.dir}/${appd_rest_jar}"/>
+
+	<copy file="${appd_simple_crypto_base}/appBuild/${appd_simple_crypto_jar}"
+              tofile="${exec.lib.dir}/${appd_simple_crypto_jar}"/>
+
+	<copy file="${appd_simple_crypto_base}/lib/${appd_simple_crypto_lib_dep}"
+              tofile="${exec.lib.dir}/${appd_simple_crypto_lib_dep}"/>
+
+
+    </target>
+
+    <target name="compile" depends="init">
+                <javac srcdir="${classes.dir}"
+                        destdir="${build.dir}"
+                        debug="on"
+                        deprecation="on"
+                        optimize="off"
+                        includes="**"
+                        target="1.6"
+                        includeantruntime="false">
+                        <classpath refid="compile.classpath"/>
+                </javac>
+    </target>
+
+    <target name="Jar_it" depends="compile">
+      <jar jarfile="${build.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar">
+          <manifest>
+              <attribute name="Main-Class" value="${hloadcheck.main}"/>
+          </manifest>
+          <fileset dir="${build.dir}">
+            <include name="org/appdynamics/utilreports/ControllerHC.class"/>
+            <include name="org/appdynamics/utilreports/conf/*.class"/>
+            <include name="org/appdynamics/utilreports/conf/*.xml"/>
+            <include name="org/appdynamics/utilreports/util/*.class"/>
+            <include name="org/appdynamics/utilreports/files/*.class"/>
+            <include name="org/appdynamics/utilreports/resources/*.class"/>
+          </fileset>
+      </jar>
+    </target>
+    
+    <target name="package" depends="Jar_it">
+        <delete file="${exec.lib.dir}/${AppDynamicsHLoadCheck.basename}*"/>
+        <copy file="${build.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar" 
+              tofile="${exec.lib.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar"/>
+    </target>
+    
+</project>
