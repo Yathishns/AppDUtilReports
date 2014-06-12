@@ -1,6 +1,6 @@
 AppDUtilReports
 ===============
-The AppDUtilReports is going to be a set of tools that will help AppDynamics users manage their environment. The first tool available will be the ControllHC, which will read a configuration xml and execute a series of REST calls to determine which business transactions, backends and/or EUM objects are not collecting data. The tool first request data for the last 4 hours and compares the total request count against the min request count. The objects that fail to have the minimum number are then check for the last 24 hours and if they fail the minimum again they are check for the last 48 hours. The toold then produces either standard output or an Excel file with the finding. The information can then be used to determine which business transactions, backends and EUM objects can be deleted. 
+The AppDUtilReports is going to be a set of tools that will help AppDynamics users manage their environment. The first tool available will be the ControllHC, which will read a configuration xml file and execute a series of REST calls to determine which business transactions, backends and/or EUM objects are not collecting data. The tool first requests data for the last 4 hours and compares the total request count against the min request count. The objects that fail to have the minimum number requests are then checked for the last 24 hours and if they fail the minimum count again they are check for the last 48 hours. The tool then produces either standard output or an Excel file with the findings. The information can then be used to determine which business transactions, backends and EUM objects can be deleted. 
 
 Requirements:
 -------------
@@ -19,21 +19,26 @@ The file contains five variables please insure that they are correct (insure tha
   appd_simple_crypto_jar=AppDSimpleCyprto_1.0.0.jar
 
 
+
 Building:
 ---------
 
 To build the package run the following command within the AppDUtilReports directory:
  ant -f AppD_build.xml
 
-This will create a directory called execLib with all of the necessary libraries to run the tool
+This will create a directory called execLib with all of the necessary libraries to run the tool.
+
 
 Pre-Execution:
 --------------
 
-Please use the example configuration file provided in src/org/appdynamics/utilreports/conf/HCExample.xml and copy it to base directory. Using the AppDSimpleCrypto tool encrypt the password for the user that you are going to use. Edit the HCExample.xml with the proper information, using the encrypted password and other needed information.
+Please use the example configuration xml file provided in src/org/appdynamics/utilreports/conf/HCExample.xml and copy it to the project base directory. Using the AppDSimpleCrypto tool encrypt the password for the REST user that you are going to use. Edit the HCExample.xml and update it with the proper information, using the encrypted password and other needed information.
 
 Usage:
 
 java -cp "execLib/*" org.appdynamics.utilreports.ControllerHC -C HCExample.xml
 
 
+Support:
+--------
+If you have any question please email me gilbert.solorzano@appdynamics.com.
