@@ -55,20 +55,6 @@ public class HCLoadOptions {
         options.addOption(AppDUtilReportS.VERSION_S, AppDUtilReportS.VERSION_L, AppDUtilReportS.VERSION_A, AppDUtilReportS.VERSION_D);
         
         
-        /*
-        Option help = OptionBuilder.withLongOpt(AppDUtilReportS.HELP_L).withArgName( AppDUtilReportS.HELP_S )
-                                .hasArg()
-                                .withDescription(  AppDUtilReportS.HELP_D )
-                                .create( AppDUtilReportS.HELP_S );
-        options.addOption(help);
-        
-        
-        Option version = OptionBuilder.withLongOpt(AppDUtilReportS.VERSION_L).withArgName( AppDUtilReportS.VERSION_S )
-                                .hasArg()
-                                .withDescription( AppDUtilReportS.VERSION_D )
-                                .create( AppDUtilReportS.VERSION_S );
-        options.addOption(version);
-        */
     }
     
     public boolean parse(){

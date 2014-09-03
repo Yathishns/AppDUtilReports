@@ -90,7 +90,7 @@ public class GatherLoadCheck {
         StringBuilder msg = new StringBuilder();
         if(bt != null) msg.append(bt.printData());
         if(bk != null) msg.append(bk.printData());
-        for(GatherEUMInfo eu : eum) msg.append(eu.printData());
+        for(GatherEUMInfo eu : eum){ if(eu != null) msg.append(eu.printData());}
         return msg.toString();
     }
 

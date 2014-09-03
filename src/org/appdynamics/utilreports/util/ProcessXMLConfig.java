@@ -62,8 +62,10 @@ public class ProcessXMLConfig {
     public void processOutputs(){
         Outputs outs=appDHC.getHcLoadChecks().getOutputs();
         for(Output out:outs.getOutpus()){
+            
             if(out.getType().equals(AppDUtilReportS.OUTPUT_TYPE_STDOUT) 
                     && out.getFormat().equals(AppDUtilReportS.OUTPUT_FORMAT_PIPEDELIMITED)) logger.log(Level.INFO,printData());
+            //logger.log(Level.INFO,"\n\nCreating EXCEL sheet");
             if(out.getType().equals(AppDUtilReportS.OUTPUT_TYPE_FILE) && out.getFormat().equals(AppDUtilReportS.OUTPUT_FORMAT_EXCEL)){
                 //This is when we are going to write the file.
                 ProcessExcelFile excelFile = new ProcessExcelFile(loadChecks, out.getFile());

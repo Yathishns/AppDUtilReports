@@ -48,7 +48,7 @@ public class ControllerHC {
         logger.log(Level.INFO,new StringBuilder().append("Parsing XML file ").append(AppDUtilReportS.CFG_FILE_V).append(" ")
                 .append(Calendar.getInstance().getTime().toString()).toString());
         ReadConfig cfg = new ReadConfig(AppDUtilReportS.CFG_FILE_V);
-        
+        //logger.log(Level.INFO,"Processing excel file...");
         ProcessXMLConfig process=new ProcessXMLConfig(cfg.getReport());
         try{
             process.init();
