@@ -36,9 +36,10 @@ public class ProcessXMLConfig {
     
     public void init() throws Exception{
         //First stop is to get a connection;
-        StringLogger sl = CryptoTool.getStringLogger();
-        
-        String pwd=sl.toLower1(sl.format1(appDHC.getServerConfig().getAccount().getPasswd()));
+        // StringLogger sl = CryptoTool.getStringLogger();
+        //Password 
+        //String pwd=sl.toLower1(sl.format1(appDHC.getServerConfig().getAccount().getPasswd()));
+        String pwd=DeCrypt.decrypt(appDHC.getServerConfig().getAccount().getPasswd());
         ServerConfig srv=appDHC.getServerConfig();
         access = new RESTAccess(srv.getController().getFqdn(),srv.getController().getPort(),
                 srv.getController().isUseSSL(),srv.getAccount().getUser(),pwd,srv.getAccount().getAccount());
