@@ -6,13 +6,21 @@ package org.appdynamics.utilreports.util;
 
 import org.appdynamics.appdrestapi.RESTAccess;
 import org.appdynamics.appdrestapi.data.*;
+import org.appdynamics.appdrestapi.util.MyCalendar;
+import org.appdynamics.utilreports.conf.QInfo;
+import org.appdynamics.utilreports.actions.*;
+import org.appdynamics.utilreports.logging.JLog_Formatter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Calendar;
 import java.util.Iterator;
 
-import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,12 +35,16 @@ public class GatherBKInfo extends GatherInfo implements Runnable{
     private long minBK48;
     private long start;
     private long end;
+    private ArrayList<QInfo> bkInfoList=new ArrayList<QInfo>();
     private HashMap<String,Long> normalBK=new HashMap<String,Long>();
     private HashMap<String,Long> _4HourBK=new HashMap<String,Long>();
     private HashMap<String,Long> _24HourBK=new HashMap<String,Long>();
     private HashMap<String,Long> _48HourBK=new HashMap<String,Long>();    
     private Calendar cal;
     
+    static {
+        setupLogger();
+    }
     
     public GatherBKInfo(RESTAccess access,String appId, long minBK){
         super();
@@ -55,89 +67,147 @@ public class GatherBKInfo extends GatherInfo implements Runnable{
     
     @Override
     public void run(){
-        run4Hours();
-        run24Hours();
+        logger.log(Level.INFO,new StringBuilder().append("The value of run is ").append(run).toString());
+        if(run == 0){run4Hours(); }
+        if(run == 1){run24Hours(); }
+        if(run == 2) {run48Hours();}
+        run++;
+    }
+    
+    @Override
+    public void run2(){
+        //run24Hours();
         run48Hours();
-        //printData();
     }
     
     public void run4Hours(){
         
-        logger.log(Level.INFO,new StringBuilder().append("Starting query for backends ").toString());
+        logger.log(Level.INFO,new StringBuilder().append("Starting query for backends and 4 hour check").toString());
+        
+        long _timeS=Calendar.getInstance().getTimeInMillis();
         
         MetricItems exitPoints = access.getBaseMetricListPath(appId, "Backends");
 
         //gatherInfo.run();
          
-         cal = Calendar.getInstance();
+         cal = MyCalendar.getCalendar();
          end = cal.getTimeInMillis();
          cal.add(Calendar.HOUR, -4);
          start = cal.getTimeInMillis();
          
-         logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 4 hours Backend request counts ").toString());
          for(MetricItem mt: exitPoints.getMetricItems()){
-             long value = 0;
-             try{
-                 //Thread.sleep(1000);
-                 value = getRollUpValue(access.getRESTBackendMetricQuery(1, appId, mt.getName(), start, end, true));
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value > minBK){
-                 normalBK.put(mt.getName(), value);
-             }else{
-                 _4HourBK.put(mt.getName(), value);
-             }
+             bkInfoList.add(new QInfo(mt.getName()));
          }
+         
+         ThreadExecutor threadExec=new ThreadExecutor(threadNumN);
+         for(QInfo bk:bkInfoList){
+             BKExecutor btExec=new BKExecutor(bk,access,appId,start,end);
+             threadExec.getExecutor().execute(btExec);
+         }
+         
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
+         
+         Iterator<QInfo> tempBKs=bkInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > minBK){
+                normalBK.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                if(bt.getValue() == -1){
+                    _48HourBK.put(bt.getName(), bt.getValue());
+                    tempBKs.remove();
+                }
+            }
+             
+
+         }
+
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         logger.log(Level.INFO,new StringBuilder().append("Completed query for backends and 4 hour check in ")
+                 .append(_endT).append(" seconds.").toString());
     }
     
     public void run24Hours(){
-        Iterator<String> bkIter=_4HourBK.keySet().iterator();
          cal.add(Calendar.HOUR, -20);
          start = cal.getTimeInMillis();
          
          logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 24 hours Backend request counts ").toString());
-         while(bkIter.hasNext()){
-             String mt = bkIter.next();
-             long value = 0;
-             try{
-                 //Thread.sleep(1300);
-                 value = getRollUpValue(access.getRESTBackendMetricQuery(1, appId, mt, start, end, true));
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value < (minBK24)){
-                 _24HourBK.put(mt, value);
-                 bkIter.remove();
-             }
+         
+         long _timeS=Calendar.getInstance().getTimeInMillis();
+         
+         ThreadExecutor threadExec=new ThreadExecutor(threadNumM);
+         for(QInfo bk:bkInfoList){
+             BKExecutor btExec=new BKExecutor(bk,access,appId,start,end);
+             threadExec.getExecutor().execute(btExec);
          }
          
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
          
+  
+         Iterator<QInfo> tempBKs=bkInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > minBK24){
+                _4HourBK.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                if(bt.getValue() == -1){
+                    _48HourBK.put(bt.getName(), bt.getValue());
+                    tempBKs.remove();
+                }
+            }
+             
+
+         }
+
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         logger.log(Level.INFO,new StringBuilder().append("Completed collection of last 24 hours Backend request counts in ")
+                 .append(_endT).append(" seconds.").toString());
     }
     
     public void run48Hours(){
-        Iterator<String> bkIter=_24HourBK.keySet().iterator();
+
          cal.add(Calendar.HOUR, -24);
          start = cal.getTimeInMillis();
-         logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 48 hours Backend request counts ").toString());
+         logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 48 hours Backend request counts.").toString());
          
-         while(bkIter.hasNext()){
-             String mt = bkIter.next();
-             long value = 0;
-             try{
-                 //Thread.sleep(1300);
-                 value = getRollUpValue(access.getRESTBackendMetricQuery(1, appId, mt, start, end, true));
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value < (minBK48)){
-                 _48HourBK.put(mt, value);
-                 bkIter.remove();
-             }
+         long _timeS=Calendar.getInstance().getTimeInMillis();
+         
+         ThreadExecutor threadExec=new ThreadExecutor(threadNum);
+         for(QInfo bk:bkInfoList){
+             BKExecutor btExec=new BKExecutor(bk,access,appId,start,end);
+             threadExec.getExecutor().execute(btExec);
          }
+         
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
+         
+         Iterator<QInfo> tempBKs=bkInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > minBK24){
+                _24HourBK.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                _48HourBK.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }
+             
+
+         }
+
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         logger.log(Level.INFO,new StringBuilder().append("Completed collection of last 48 hours Backend request counts in ")
+                 .append(_endT).append(" seconds.").toString());
     }
     
     public String printData(){
@@ -209,5 +279,19 @@ public class GatherBKInfo extends GatherInfo implements Runnable{
         this._48HourBK = _48HourBK;
     }
     
-    
+    public static void setupLogger(){
+        Handler fileH;
+        Formatter formatter;
+        try{
+            fileH = new FileHandler("./ControllerHC.log", 1024*1024*32,1,true);
+            formatter = new JLog_Formatter();
+            //logger.getHandlers()[0].setFormatter(formatter);
+            logger.addHandler(fileH);
+            
+            fileH.setFormatter(formatter);
+            fileH.setLevel(Level.ALL);
+            logger.setLevel(Level.ALL);
+            
+        }catch(Exception e){logger.log(Level.SEVERE,new StringBuilder().append("Exception e: ").append(e.getMessage()).toString());}
+    }
 }

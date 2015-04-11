@@ -13,7 +13,11 @@ import java.util.logging.Level;
  *
  * @author gilbert.solorzano
  */
-public class GatherInfo {
+public class GatherInfo implements Runnable{
+    protected int threadNum=2;
+    protected int threadNumM=2;
+    protected int threadNumN=2;
+    protected int run=0;
     
     public GatherInfo(){}
     
@@ -24,4 +28,11 @@ public class GatherInfo {
         
         return 0;
     }
+    
+    @Override
+    public void run(){}
+    
+    public void run2(){}
+    
+    
 }

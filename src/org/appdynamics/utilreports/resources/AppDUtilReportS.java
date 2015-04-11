@@ -39,6 +39,7 @@ public class AppDUtilReportS {
     public static final String L5="\n\t\t    ";
     public static final String L6="\n\t\t\t";
     public static final String VE=" = ";
+    public static final String _U="_";
     
     public static final int DEF_MIN=50;
     public static final int DEF_MIN24=100;
@@ -67,6 +68,8 @@ public class AppDUtilReportS {
     public static final String LOAD_CHECK="load-check";
     public static final String NAME="name";
     public static final String ENABLED="enabled";
+    public static final String CHECK="check";
+    public static final String HOURS="hours";
     public static final String MIN_COUNT="min-count";
     public static final String MIN24_COUNT="min24-count";
     public static final String MIN48_COUNT="min48-count";
@@ -82,6 +85,9 @@ public class AppDUtilReportS {
     public static final String EUM_AJAX_CHECK="eum-ajax-check";
     public static final String EUM_BASE_PAGE_CHECK="eum-base-page-check";
     public static final String EUM_IFRAME_CHECK="eum-iframe-check";
+    
+    public static final String BUSINESS_TRANSACTION="Business Transaction Names";
+    public static final String BACKENDS="Backend Nanes";
     
     /**  Options **/
     public static final String CONTROLLER_L="controller";
@@ -177,6 +183,16 @@ public class AppDUtilReportS {
     public static final boolean CFG_FILE_R=false;
     public static final boolean CFG_FILE_A=true;
     public static String CFG_FILE_V;
+    
+    
+    // Execl File
+    public static final String TIME_RANGE="Time Ranage";
+    public static final String APPLICATION_EQ="Application=";
+    public static final String REQUEST_COUNTS="Request Counts";
+    public static final String LAST_4_HOURS="Last 4 Hours";
+    public static final String LAST_24_HOURS="Last 24 Hours";
+    public static final String LAST_48_HOURS="Last 48 Hours";
+    public static final String NORMAL="Normal Load Within 4hrs";
     
     
 }

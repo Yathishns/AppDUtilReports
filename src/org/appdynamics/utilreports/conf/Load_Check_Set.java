@@ -16,6 +16,7 @@ import java.util.ArrayList;
 public class Load_Check_Set {
     private ArrayList<Load_Check> hcLoadCheck=new ArrayList<Load_Check>();
     private String application;
+    private String applicationName;
     
     public Load_Check_Set(){}
 

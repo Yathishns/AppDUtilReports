@@ -5,12 +5,29 @@
     <property name="lib.dir"			value="${basedir}/lib"/> 
     <property name="exec.lib.dir"		value="${basedir}/execLib"/> 
     <property name="poi.lib.dir"		value="${basedir}/poiLibs"/>
+
+    <!-- These are going to be the specific project tools -->
+
+    <property name="monitor.file"               value="monitor.xml"/>
+    <property name="config.file"                value="AppDMetricExtract.xml"/>
+    <property name="monitor.file.path"          value="resources/conf/"/>
+    <property name="monitor.exec.file"          value="execJava.sh"/>
+
+    <property name="appdextract.main"            value="org.appdynamics.extension.appdextract.ExportMetrics"/>
+
+    <property name="AppDExtract.basename" value="AppDExtract"/>
+    <property name="AppDExtract.version"     value="1.0.2"/>
     <property name="hloadcheck.main"            value="org.appdynamics.utilreports.ControllerHC"/>
+    <property name="AppDBackupConfiguration.main" value="org.appdynamics.backup.BackupConfiguration"/>
 
     <property name="AppDynamicsHLoadCheck.basename" value="AppDynamicsHLoadCheck"/>
-    <property name="AppDynamicsHLoadCheck.version"     value="1.0.2"/>
+    <property name="AppDBackupConfiguration.basename" value="AppDBackupConfiguration"/>
+    <property name="AppDynamicsHLoadCheck.version"     value="1.0.4"/>
+    <property name="AppDBackupConfiguration.version" value="0.9.0"/>
 
     <loadproperties srcFile="one_time_git.properties"/>    
+
+   <!-- We are going to build the rest of the stuff here -->
     
     <path id="compile.classpath">
 	<fileset dir="${exec.lib.dir}/">
@@ -56,7 +73,7 @@
                         deprecation="on"
                         optimize="off"
                         includes="**"
-                        target="1.6"
+                        target="1.7"
                         includeantruntime="false">
                         <classpath refid="compile.classpath"/>
                 </javac>
@@ -69,19 +86,80 @@
           </manifest>
           <fileset dir="${build.dir}">
             <include name="org/appdynamics/utilreports/ControllerHC.class"/>
+            <include name="org/appdynamics/utilreports/actions/*.class"/>
             <include name="org/appdynamics/utilreports/conf/*.class"/>
             <include name="org/appdynamics/utilreports/conf/*.xml"/>
             <include name="org/appdynamics/utilreports/util/*.class"/>
+            <include name="org/appdynamics/utilreports/logging/*.class"/>
             <include name="org/appdynamics/utilreports/files/*.class"/>
             <include name="org/appdynamics/utilreports/resources/*.class"/>
+          </fileset>
+      </jar>
+      <jar jarfile="${build.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar">
+          <manifest>
+              <attribute name="Main-Class" value="${AppDBackupConfiguration.main}"/>
+          </manifest>
+          <fileset dir="${build.dir}">
+            <include name="org/appdynamics/backup/BackupConfiguration.class"/>
+            <include name="org/appdynamics/backup/resources/*.class"/>
+            <include name="org/appdynamics/backup/util/*.class"/>
+          </fileset>
+      </jar>
+
+      <jar jarfile="${build.dir}/${AppDExtract.basename}.jar">
+          <manifest>
+              <attribute name="Main-Class" value="${appdextract.main}"/>
+          </manifest>
+          <fileset dir="${build.dir}">
+            <include name="org/appdynamics/extension/appdextract/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/conf/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/data/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/logging/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/outputs/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/processors/*.class"/>
+            <include name="org/appdynamics/extension/appdextract/resources/*.class"/>
           </fileset>
       </jar>
     </target>
     
     <target name="package" depends="Jar_it">
+
         <delete file="${exec.lib.dir}/${AppDynamicsHLoadCheck.basename}*"/>
         <copy file="${build.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar" 
               tofile="${exec.lib.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar"/>
+        <copy file="${build.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar" 
+              tofile="${exec.lib.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar"/>
+
+       <!-- Extract Code -->
+       <delete file="${exec.lib.dir}/${AppDExtract.basename}*"/>
+        <copy file="${build.dir}/${AppDExtract.basename}.jar"
+              tofile="${exec.lib.dir}/${AppDExtract.basename}.jar"/>
+
+        <mkdir dir="${build.dir}/${base.folder}"/>
+        <mkdir dir="${build.dir}/${base.folder}/conf"/>
+        <mkdir dir="${build.dir}/${base.folder}/lib"/>
+
+
+        <copy todir="${build.dir}/${base.folder}/conf">
+            <fileset dir="${classes.dir}/${monitor.file.path}/">
+                <include name="${config.file}"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${build.dir}/${base.folder}/">
+            <fileset dir="${classes.dir}/${monitor.file.path}/">
+                <include name="${monitor.file}"/>
+                <include name="${monitor.exec.file}"/>
+            </fileset>
+        </copy>
+
+        <copy todir="${build.dir}/${base.folder}/lib">
+            <fileset dir="${exec.lib.dir}/">
+                <include name="*.jar"/>
+            </fileset>
+        </copy>
+
+        <zip destfile="${build.dir}/${base.folder}.zip" basedir="${build.dir}/" includes="${base.folder}/*,${base.folder}/lib/*,${base.folder}/conf/*"/>
     </target>
     
 </project>

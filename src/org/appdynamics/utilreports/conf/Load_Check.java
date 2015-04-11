@@ -6,23 +6,24 @@ package org.appdynamics.utilreports.conf;
 
 import org.appdynamics.utilreports.resources.AppDUtilReportS;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author gilbert.solorzano
  * 
- *         <bt-check enabled="true">
-            <min-4hour-bt-count>50</min-4hour-bt-count>
-            <min-24hour-bt-count>100</min-24hour-bt-count>
-            <min-48hour-bt-count>150</min-48hour-bt-count>
-        </bt-check>
+ *         <load-check name="eum-ajax-check" enabled="true">
+                <check name="last-4-hours" hours="4" >50</check>
+                <check name="last-24-hours" hours="24">100</check>
+                <check name="last-48-hours" hours="48">150</check>
+            </load-check>
         * 
  */
 public class Load_Check {
     private boolean enabled;
     private String name;
-    private int min;
-    private int min24;
-    private int min48;
+    private ArrayList<CheckXML> checks=new ArrayList<CheckXML>();
+
     
     public Load_Check(){}
 
@@ -42,29 +43,16 @@ public class Load_Check {
         this.name = name;
     }
 
-    public int getMin() {
-        return min;
+    public ArrayList<CheckXML> getChecks() {
+        return checks;
     }
 
-    public void setMin(int min) {
-        this.min = min;
+    public void setChecks(ArrayList<CheckXML> checks) {
+        this.checks = checks;
     }
 
-    public int getMin24() {
-        return min24;
-    }
+    
 
-    public void setMin24(int min24) {
-        this.min24 = min24;
-    }
-
-    public int getMin48() {
-        return min48;
-    }
-
-    public void setMin48(int min48) {
-        this.min48 = min48;
-    }
     
     @Override
     public String toString(){
@@ -72,10 +60,7 @@ public class Load_Check {
         bud.append(AppDUtilReportS.L3).append(AppDUtilReportS.LOAD_CHECK);
         bud.append(AppDUtilReportS.L4).append(AppDUtilReportS.NAME).append(AppDUtilReportS.VE).append(name);
         bud.append(AppDUtilReportS.L4).append(AppDUtilReportS.ENABLED).append(AppDUtilReportS.VE).append(enabled);
-        bud.append(AppDUtilReportS.L4).append(AppDUtilReportS.MIN_COUNT).append(AppDUtilReportS.VE).append(min);
-        bud.append(AppDUtilReportS.L4).append(AppDUtilReportS.MIN24_COUNT).append(AppDUtilReportS.VE).append(min24);
-        bud.append(AppDUtilReportS.L4).append(AppDUtilReportS.MIN48_COUNT).append(AppDUtilReportS.VE).append(min48);
-        
+        for(CheckXML check:checks)bud.append(check.toString());
         return bud.toString();
     }
     

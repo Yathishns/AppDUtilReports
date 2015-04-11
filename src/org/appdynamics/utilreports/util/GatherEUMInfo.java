@@ -7,13 +7,21 @@ package org.appdynamics.utilreports.util;
 
 import org.appdynamics.appdrestapi.RESTAccess;
 import org.appdynamics.appdrestapi.data.*;
+import org.appdynamics.appdrestapi.util.MyCalendar;
+import org.appdynamics.utilreports.actions.*;
+import org.appdynamics.utilreports.conf.QInfo;
+import org.appdynamics.utilreports.logging.JLog_Formatter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Calendar;
 import java.util.Iterator;
 
-import java.util.logging.Logger;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -30,12 +38,15 @@ public class GatherEUMInfo extends GatherInfo implements Runnable{
     private long end;
     
     private int type;
-    
+    private ArrayList<QInfo> eumInfoList=new ArrayList<QInfo>();
     private HashMap<String,Long> normalEUM=new HashMap<String,Long>();
     private HashMap<String,Long> _4HourEUM=new HashMap<String,Long>();
     private HashMap<String,Long> _24HourEUM=new HashMap<String,Long>();
     private HashMap<String,Long> _48HourEUM=new HashMap<String,Long>();  
         
+    static {
+        setupLogger();
+    }
     
     private Calendar cal;
     
@@ -62,10 +73,17 @@ public class GatherEUMInfo extends GatherInfo implements Runnable{
     
     @Override
     public void run(){
-        run4Hours();
-        run24Hours();
+        logger.log(Level.INFO,new StringBuilder().append("The value of run is ").append(run).toString());
+        if(run == 0){run4Hours(); }
+        if(run == 1){run24Hours();}
+        if(run == 2) {run48Hours();}
+         run++;
+    }
+    
+    @Override
+    public void run2(){
+        //run24Hours();
         run48Hours();
-        //printData();
     }
 
     public int getType() {
@@ -97,84 +115,142 @@ public class GatherEUMInfo extends GatherInfo implements Runnable{
     
     public void run4Hours(){
         logger.log(Level.INFO,new StringBuilder().append("Starting query for ").append(getName()).append(" ").toString());
-        MetricItems eum = access.getBaseMetricListPath(appId, getPath());
         
+        long _timeS=Calendar.getInstance().getTimeInMillis();
+        
+        MetricItems eum = access.getBaseMetricListPath(appId, getPath());
+        if(eum == null){
+            logger.log(Level.SEVERE,new StringBuilder().append("EUM path for ").append(getPath()).append(" return null.").toString());
+            return;
+        }
          
-         cal = Calendar.getInstance();
+         cal = MyCalendar.getCalendar();
          end = cal.getTimeInMillis();
          cal.add(Calendar.HOUR, -4);
          start = cal.getTimeInMillis();
          
          logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 4 hours ").append(getName())
                  .append(" request counts ").toString());
+         
          for(MetricItem mt: eum.getMetricItems()){
-             long value = 0;
-             try{
-                 
-                 value = getRollUpValue(access.getRESTEUMMetricQuery(getIndex(), appId, mt.getName(), start, end, true));
-                 
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value > min){
-                 normalEUM.put(mt.getName(), value);
-             }else{
-                 _4HourEUM.put(mt.getName(), value);
-             }
+             eumInfoList.add(new QInfo(mt.getName()));
          }
          
+         ThreadExecutor threadExec=new ThreadExecutor(threadNumN);
+         for(QInfo eu:eumInfoList){
+             EUMExecutor btExec=new EUMExecutor(eu,access,appId,start,end,getIndex());
+             threadExec.getExecutor().execute(btExec);
+         }
          
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
+         
+        
+         Iterator<QInfo> tempBKs=eumInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > min){
+                normalEUM.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                if(bt.getValue() == -1){
+                    _48HourEUM.put(bt.getName(), bt.getValue());
+                    tempBKs.remove();
+                }
+            }
+             
+
+         }
+
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         
+         logger.log(Level.INFO,new StringBuilder().append("Completed collection of last 4 hours ").append(getName())
+                 .append(" request counts in ").append(_endT).append(" seconds.").toString());
     }
     
     public void run24Hours(){
-        Iterator<String> bkIter=_4HourEUM.keySet().iterator();
+        
          cal.add(Calendar.HOUR, -20);
          start = cal.getTimeInMillis();
          
          logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 24 hours ").append(getName())
                  .append(" request counts ").toString());
-         while(bkIter.hasNext()){
-             String mt = bkIter.next();
-             long value = 0;
-             try{
-                 //Thread.sleep(1300);
-                 value = getRollUpValue(access.getRESTEUMMetricQuery(getIndex(), appId, mt, start, end, true));
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value < (min24)){
-                 _24HourEUM.put(mt, value);
-                 bkIter.remove();
-             }
+         
+         long _timeS=Calendar.getInstance().getTimeInMillis();
+         
+         ThreadExecutor threadExec=new ThreadExecutor(threadNumM);
+         for(QInfo eu:eumInfoList){
+             EUMExecutor btExec=new EUMExecutor(eu,access,appId,start,end,getIndex());
+             threadExec.getExecutor().execute(btExec);
          }
          
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
          
+         Iterator<QInfo> tempBKs=eumInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > min24){
+                _4HourEUM.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                if(bt.getValue() == -1){
+                    _48HourEUM.put(bt.getName(), bt.getValue());
+                    tempBKs.remove();
+                }
+            }
+             
+
+         }
+         
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         logger.log(Level.INFO,new StringBuilder().append("Completed collection of last 24 hours ").append(getName())
+                 .append(" request counts in ").append(_endT).append(" seconds.").toString());
     }
     
     public void run48Hours(){
-        Iterator<String> bkIter=_24HourEUM.keySet().iterator();
+        Iterator<String> eumIter=_24HourEUM.keySet().iterator();
          cal.add(Calendar.HOUR, -24);
          start = cal.getTimeInMillis();
          
          logger.log(Level.INFO,new StringBuilder().append("Starting collection of last 48 hours ").append(getName())
                  .append(" request counts ").toString());
-         while(bkIter.hasNext()){
-             String mt = bkIter.next();
-             long value = 0;
-             try{
-                 //Thread.sleep(1300);
-                 value = getRollUpValue(access.getRESTEUMMetricQuery(getIndex(), appId, mt, start, end, true));
-             }catch(Exception e){
-                 logger.log(Level.WARNING,new StringBuilder().append("Exception running ").append(mt.toString()).toString());
-             }
-             
-             if(value < min48){
-                 _48HourEUM.put(mt, value);
-                 bkIter.remove();
-             }
+         
+         long _timeS=Calendar.getInstance().getTimeInMillis();
+         
+         ThreadExecutor threadExec=new ThreadExecutor(threadNum);
+         for(QInfo eu:eumInfoList){
+             EUMExecutor btExec=new EUMExecutor(eu,access,appId,start,end,getIndex());
+             threadExec.getExecutor().execute(btExec);
          }
+         
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
+         
+         Iterator<QInfo> tempBKs=eumInfoList.iterator();
+         
+         while(tempBKs.hasNext()){
+             QInfo bt = tempBKs.next();
+ 
+            if(bt.getValue() > min48){
+                _24HourEUM.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }else{
+                _48HourEUM.put(bt.getName(),bt.getValue());
+                tempBKs.remove();
+            }
+             
+
+         }
+
+         long _endT=(Calendar.getInstance().getTimeInMillis()-_timeS)/1000;
+         
+         logger.log(Level.INFO,new StringBuilder().append("Completed collection of last 48 hours ").append(getName())
+                 .append(" request counts in ").append(_endT).append(" seconds.").toString());
     }
     
     public String printData(){
@@ -247,5 +323,19 @@ public class GatherEUMInfo extends GatherInfo implements Runnable{
         this._48HourEUM = _48HourEUM;
     }
     
-    
+    public static void setupLogger(){
+        Handler fileH;
+        Formatter formatter;
+        try{
+            fileH = new FileHandler("./ControllerHC.log", 1024*1024*32,1,true);
+            formatter = new JLog_Formatter();
+            //logger.getHandlers()[0].setFormatter(formatter);
+            logger.addHandler(fileH);
+            
+            fileH.setFormatter(formatter);
+            fileH.setLevel(Level.ALL);
+            logger.setLevel(Level.ALL);
+            
+        }catch(Exception e){logger.log(Level.SEVERE,new StringBuilder().append("Exception e: ").append(e.getMessage()).toString());}
+    }
 }

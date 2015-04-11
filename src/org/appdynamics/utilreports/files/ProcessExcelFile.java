@@ -7,6 +7,7 @@ package org.appdynamics.utilreports.files;
 import org.appdynamics.appdrestapi.data.BusinessTransaction;
 import org.appdynamics.utilreports.resources.AppDUtilReportS;
 import org.appdynamics.utilreports.util.*;
+import org.appdynamics.utilreports.conf.*;
 
 
 import java.io.File;
@@ -40,30 +41,14 @@ public class ProcessExcelFile {
         XSSFWorkbook workbook = new XSSFWorkbook();
         //logger.log(Level.INFO,"Start excel sheet.");
         for(GatherLoadCheck glc:loadChecks){
-            String app=glc.getLc().getApplication();
+            //String app=glc.getLc().getApplication();
             //Create a blank sheet
-            
-            if(glc.getBt() != null){
-                //logger.log(Level.INFO,"Start excel sheet for BTs");
-                XSSFSheet btSummary = 
-                        workbook.createSheet(new StringBuilder().append(AppDUtilReportS.BT_CHECK).append("_").append(app).toString());
-                processBT(btSummary,glc.getBt(),app);
-                //logger.log(Level.INFO,"Done excel sheet for BTs");
+            for(LoadCheck lc:glc.getLoadCheckList()){
+                //logger.log(Level.INFO,new StringBuilder().append("Sheet Name ").append(lc.getSheetName()).append(", ").append(lc.getAppName()).toString());
+                XSSFSheet _sheet = workbook.createSheet(new StringBuilder().append(lc.getSheetName()).append(AppDUtilReportS._U).append(lc.getAppId()).toString());
+                processCheck(_sheet,lc);
             }
-            if(glc.getBk() != null){
-                //logger.log(Level.INFO,"Start excel sheet for BKs");
-                XSSFSheet beSummary = 
-                        workbook.createSheet(new StringBuilder().append(AppDUtilReportS.BE_CHECK).append("_").append(app).toString());
-                processBE(beSummary,glc.getBk(),app);
-                //logger.log(Level.INFO,"End excel sheet for BKs");
-            }
-            for(GatherEUMInfo eum: glc.getEum()){
-                //logger.log(Level.INFO,"Start excel sheet for EUM");
-                XSSFSheet eumSummary = 
-                        workbook.createSheet(new StringBuilder().append(eum.getName()).append("_").append(app).toString());
-                processEUM(eumSummary,eum,app);
-                //logger.log(Level.INFO,"End excel sheet for EUM");
-            }
+
 
         }
         
@@ -84,11 +69,73 @@ public class ProcessExcelFile {
         }
     }
     
+    private void processCheck(XSSFSheet xsf, LoadCheck lc){
+        
+        //First row is the application
+        int rowIndex=0;int cellIndex=0;
+        Row headerRow = xsf.createRow(rowIndex);
+        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append(AppDUtilReportS.APPLICATION_EQ).append(lc.getAppName()).append(" (id=").append(lc.getAppId()).append(")").toString());
+        cellIndex++;
+        Cell cell_1 ;
+        
+        rowIndex+=2;
+        headerRow = xsf.createRow(rowIndex);
+        //Second row is the header
+        cellIndex=0;
+        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue(AppDUtilReportS.TIME_RANGE);
+        cellIndex++;
+        cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(lc.getHeader());
+        cellIndex++;
+        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(AppDUtilReportS.REQUEST_COUNTS);
+        Cell cell_3;
+        if(lc.getMetricIndex()==5){
+            cellIndex++;
+            cell_3 = headerRow.createCell(cellIndex);cell_3.setCellValue("Tier Name");
+        }
+        cellIndex=0;
+        
+        for(CheckAll check:lc.getChecks()){
+            for(QInfo info:check.getMyList()){
+                rowIndex++;
+                headerRow = xsf.createRow(rowIndex);
+                cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue(check.getName());
+                cellIndex++;
+                cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(info.getName());
+                cellIndex++;
+                cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(info.getValue());
+                cellIndex++;
+                if(lc.getMetricIndex()==5){
+                    cell_3 = headerRow.createCell(cellIndex);cell_3.setCellValue(info.getTierName());
+                }
+                cellIndex=0;
+            }
+            
+            
+        }
+        for(QInfo info:lc.getBase()){
+                if(!info.isPassed()){ //this are the badones.
+                rowIndex++;
+                headerRow = xsf.createRow(rowIndex);
+                cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue("Past the Time");
+                cellIndex++;
+                cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(info.getName());
+                cellIndex++;
+                cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(info.getValue());
+                cellIndex++;
+                if(lc.getMetricIndex()==5){
+                    cell_3 = headerRow.createCell(cellIndex);cell_3.setCellValue(info.getTierName());
+                }
+                cellIndex=0;
+                }
+            
+        }
+        
+    }
     private void processBT(XSSFSheet xsf, GatherBTInfo bt, String app){
         //First row is the application
         int rowIndex=0;int cellIndex=0;
         Row headerRow = xsf.createRow(rowIndex);
-        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append("Appliation=").append(app).toString());
+        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append(AppDUtilReportS.APPLICATION_EQ).append(app).toString());
         cellIndex++;
         Cell cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(new StringBuilder()
                 .append("BT query end time ").append(getDate(bt.getEnd())).toString());
@@ -97,11 +144,11 @@ public class ProcessExcelFile {
         headerRow = xsf.createRow(rowIndex);
         //Second row is the header
         cellIndex=0;
-        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue("Time Ranage");
+        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue(AppDUtilReportS.TIME_RANGE);
         cellIndex++;
         cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue("Business Transaction Name");
         cellIndex++;
-        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue("Request Couns");
+        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(AppDUtilReportS.REQUEST_COUNTS);
         cellIndex++;
         Cell cell_3 = headerRow.createCell(cellIndex);cell_3.setCellValue("Tier Name");
         
@@ -109,7 +156,7 @@ public class ProcessExcelFile {
         
         rowIndex++;
         //Now we start putting down the data
-        String hourRange = "Last 4 Hours";
+        String hourRange = AppDUtilReportS.LAST_4_HOURS;
         for(BusinessTransaction dBt:bt.get4HourBT().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -123,7 +170,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 24 Hours";
+        hourRange = AppDUtilReportS.LAST_24_HOURS;
         for(BusinessTransaction dBt:bt.get24HourBT().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -137,7 +184,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 48 Hours";
+        hourRange = AppDUtilReportS.LAST_48_HOURS;
         for(BusinessTransaction dBt:bt.get48HourBT().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -151,7 +198,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         //We are going to create row 0 first 
-        hourRange = "Normal Load Within 4hrs";
+        hourRange = AppDUtilReportS.NORMAL;
         for(BusinessTransaction dBt:bt.getNormalBT().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -170,7 +217,7 @@ public class ProcessExcelFile {
         //First row is the application
         int rowIndex=0;int cellIndex=0;
         Row headerRow = xsf.createRow(rowIndex);
-        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append("Appliation=").append(app).toString());
+        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append(AppDUtilReportS.APPLICATION_EQ).append(app).toString());
         cellIndex++;
         Cell cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(new StringBuilder()
                 .append("BE query end time ").append(getDate(bk.getEnd())).toString());
@@ -179,17 +226,17 @@ public class ProcessExcelFile {
         headerRow = xsf.createRow(rowIndex);
         //Second row is the header
         cellIndex=0;
-        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue("Time Ranage");
+        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue(AppDUtilReportS.TIME_RANGE);
         cellIndex++;
         cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue("Backend Name");
         cellIndex++;
-        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue("Request Couns");
+        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(AppDUtilReportS.REQUEST_COUNTS);
         
         cellIndex=0;
         
         rowIndex++;
         //Now we start putting down the data
-        String hourRange = "Last 4 Hours";
+        String hourRange = AppDUtilReportS.LAST_4_HOURS;
         for(String dBt:bk.get4HourBK().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -201,7 +248,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 24 Hours";
+        hourRange = AppDUtilReportS.LAST_24_HOURS;
         for(String dBt:bk.get24HourBK().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -213,7 +260,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 48 Hours";
+        hourRange = AppDUtilReportS.LAST_48_HOURS;
         for(String dBt:bk.get48HourBK().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -225,7 +272,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         //We are going to create row 0 first
-        hourRange = "Normal Load Within 4hrs";
+        hourRange = AppDUtilReportS.NORMAL;
         for(String dBt:bk.getNormalBK().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -242,7 +289,7 @@ public class ProcessExcelFile {
         //First row is the application
         int rowIndex=0;int cellIndex=0;
         Row headerRow = xsf.createRow(rowIndex);
-        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append("Appliation=").append(app).toString());
+        Cell cell_0 = headerRow.createCell(cellIndex);cell_0.setCellValue(new StringBuilder().append(AppDUtilReportS.APPLICATION_EQ).append(app).toString());
         cellIndex++;
         Cell cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(new StringBuilder()
                 .append("EUM Query end time ").append(getDate(eum.getEnd())).toString());
@@ -251,17 +298,17 @@ public class ProcessExcelFile {
         headerRow = xsf.createRow(rowIndex);
         //Second row is the header
         cellIndex=0;
-        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue("Time Ranage");
+        cell_0=headerRow.createCell(cellIndex);cell_0.setCellValue(AppDUtilReportS.TIME_RANGE);
         cellIndex++;
         cell_1 = headerRow.createCell(cellIndex);cell_1.setCellValue(new StringBuilder().append(eum.getName()).append(" Name").toString());
         cellIndex++;
-        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue("Request Couns");
+        Cell cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(AppDUtilReportS.REQUEST_COUNTS);
         
         cellIndex=0;
         
         rowIndex++;
         //Now we start putting down the data
-        String hourRange = "Last 4 Hours";
+        String hourRange = AppDUtilReportS.LAST_4_HOURS;
         for(String dBt:eum.get4HourEUM().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -273,7 +320,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 24 Hours";
+        hourRange = AppDUtilReportS.LAST_24_HOURS;
         for(String dBt:eum.get24HourEUM().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -285,7 +332,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         
-        hourRange = "Last 48 Hours";
+        hourRange = AppDUtilReportS.LAST_48_HOURS;
         for(String dBt:eum.get48HourEUM().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);
@@ -297,7 +344,7 @@ public class ProcessExcelFile {
             cellIndex=0;
         }
         //We are going to create row 0 first
-        hourRange = "Normal Load Within 4hrs";
+        hourRange = AppDUtilReportS.NORMAL;
         for(String dBt:eum.getNormalEUM().keySet()){
             rowIndex++;
             headerRow = xsf.createRow(rowIndex);

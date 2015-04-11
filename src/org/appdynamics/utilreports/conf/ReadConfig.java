@@ -105,8 +105,28 @@ public class ReadConfig {
             outs.getOutpus().add(output);
         }
         
+       
+        for(int i=0; i < checksXML.getElementsByTagName(AppDUtilReportS.LOAD_CHECK).getLength(); i++){
+            Element loadC = (Element)checksXML.getElementsByTagName(AppDUtilReportS.LOAD_CHECK).item(i);
+            
+            Load_Check lc = new Load_Check();
+            lc.setName(loadC.getAttributes().getNamedItem(AppDUtilReportS.NAME).getNodeValue());
+            lc.setEnabled(getBoolean(loadC.getAttributes().getNamedItem(AppDUtilReportS.ENABLED).getNodeValue()));
+            for(int a=0; a < loadC.getElementsByTagName(AppDUtilReportS.CHECK).getLength();a++){
+                
+                Element check_ = (Element)loadC.getElementsByTagName(AppDUtilReportS.CHECK).item(a);
+                CheckXML check = new CheckXML();
+                check.setName(check_.getAttribute(AppDUtilReportS.NAME));
+                check.setHours(stringToInt(check_.getAttribute(AppDUtilReportS.HOURS),AppDUtilReportS.DEF_MIN));
+                check.setMin(stringToInt(check_.getNodeValue(),AppDUtilReportS.DEF_MIN));
+                lc.getChecks().add(check);
+            }
+            checkSet.getHcLoadCheck().add(lc);
+            //System.out.println(lc.toString());
+        }
+        //System.out.println(checkSet.getApplication());
         //System.out.println(checksXML.getAttributes().getNamedItem(AppDUtilReportS.APPLICATION).getNodeValue());
-        
+        /*
         for(int i=0; i < checksXML.getElementsByTagName(AppDUtilReportS.LOAD_CHECK).getLength(); i++){
             Element loadC = (Element)checksXML.getElementsByTagName(AppDUtilReportS.LOAD_CHECK).item(i);
             Load_Check lc = new Load_Check();
@@ -119,6 +139,8 @@ public class ReadConfig {
             //System.out.println(lc.toString());
             
         }
+        */
+        
         checks.getLoadCheckSet().add(checkSet);
         checks.setOutputs(outs);
         return checks;

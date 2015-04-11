@@ -7,13 +7,19 @@ package org.appdynamics.utilreports.util;
 
 import org.appdynamics.utilreports.conf.Load_Check_Set;
 import org.appdynamics.utilreports.conf.Load_Check;
+import org.appdynamics.utilreports.conf.CheckXML;
 import org.appdynamics.utilreports.resources.AppDUtilReportS;
 import org.appdynamics.appdrestapi.RESTAccess;
+import org.appdynamics.appdrestapi.data.Applications;
+import org.appdynamics.appdrestapi.data.Application;
 
 import java.util.ArrayList;
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import org.appdynamics.utilreports.actions.BKExecutor;
+import org.appdynamics.utilreports.actions.ThreadExecutor;
+import org.appdynamics.utilreports.conf.QInfo;
 
 
 /**
@@ -32,7 +38,10 @@ import java.util.logging.Level;
  */
 public class GatherLoadCheck {
     private static Logger logger=Logger.getLogger(GatherLoadCheck.class.getName());
+    private Applications apps;
     private ArrayList<Thread> execThreads=new ArrayList<Thread>();
+    private ArrayList<GatherInfo> infoList=new ArrayList<GatherInfo>();
+    private ArrayList<LoadCheck> loadCheckList = new ArrayList<LoadCheck>();
     private GatherBTInfo bt;
     private GatherBKInfo bk;
     private ArrayList<GatherEUMInfo> eum=new ArrayList<GatherEUMInfo>();
@@ -43,47 +52,82 @@ public class GatherLoadCheck {
     public GatherLoadCheck(RESTAccess access,Load_Check_Set lc ){this.lc=lc;this.access=access;}
     
     public void init(){
+        setApplications();
         logger.log(Level.INFO,"Initializing collections");
-        for(Load_Check lcItem: lc.getHcLoadCheck()){
-            if(lcItem.isEnabled()){
+        
+        if(lc.getApplication().equals("@@All")){
+            //We are going to check for all
+            for(Application app:apps.getApplications()){
+            logger.log(Level.INFO,new StringBuilder().append("Working with the apps collections for ").append(app.getName()).toString());
+                for(Load_Check lcItem: lc.getHcLoadCheck()){
+                    if(lcItem.isEnabled()){
+
+                        LoadCheck lCheck=new LoadCheck(lcItem.getName(),access);
+                        lCheck.setAppId(Integer.toString(app.getId()));
+                        lCheck.setAppName(app.getName());
+                        lCheck.setMetricTypeFromName();
+                        for(CheckXML chkXML:lcItem.getChecks()){
+                            CheckAll chk = new CheckAll(chkXML.getName(),chkXML.getHours(),chkXML.getMin(),lCheck.getMetricIndex(),access,lCheck.getAppId());
+                            lCheck.getChecks().add(chk);
+                        }
+
+                        loadCheckList.add(lCheck);
+                    }
+                }
                 
-                if(lcItem.getName().equals(AppDUtilReportS.BT_CHECK)){ 
-                    bt=new GatherBTInfo(access,lc.getApplication(),lcItem.getMin(),lcItem.getMin24(),lcItem.getMin48());
-                    execThreads.add(new Thread(bt));
+            }
+            logger.log(Level.INFO,new StringBuilder().append("Total number of checks ").append(loadCheckList.size()).toString());
+        }else{
+            Application app=getApplication(lc.getApplication());
+            for(Load_Check lcItem: lc.getHcLoadCheck()){
+                
+                if(lcItem.isEnabled()){
+
+                    LoadCheck lCheck=new LoadCheck(lcItem.getName(),access);
+                    lCheck.setAppId(Integer.toString(app.getId()));
+                    lCheck.setAppName(app.getName());
+                    lCheck.setMetricTypeFromName();
+                    for(CheckXML chkXML:lcItem.getChecks()){
+                        CheckAll chk = new CheckAll(chkXML.getName(),chkXML.getHours(),chkXML.getMin(),lCheck.getMetricIndex(),access,lCheck.getAppId());
+                        lCheck.getChecks().add(chk);
+                    }
+
+                    loadCheckList.add(lCheck);
                 }
-                if(lcItem.getName().equals(AppDUtilReportS.BE_CHECK)){ 
-                    bk=new GatherBKInfo(access,lc.getApplication(),lcItem.getMin(),lcItem.getMin24(),lcItem.getMin48());
-                    execThreads.add(new Thread(bk));
-                }
-                if(lcItem.getName().equals(AppDUtilReportS.EUM_AJAX_CHECK)){   
-                    GatherEUMInfo eum1=new GatherEUMInfo(access,lc.getApplication(),lcItem.getMin(),lcItem.getMin24(),lcItem.getMin48(),0);
-                    eum.add(eum1); 
-                    execThreads.add(new Thread(eum1));
-                }
-                if(lcItem.getName().equals(AppDUtilReportS.EUM_BASE_PAGE_CHECK)){ 
-                   GatherEUMInfo eum1=new GatherEUMInfo(access,lc.getApplication(),lcItem.getMin(),lcItem.getMin24(),lcItem.getMin48(),1);
-                    eum.add(eum1);
-                    execThreads.add(new Thread(eum1));
-                }
-                if(lcItem.getName().equals(AppDUtilReportS.EUM_IFRAME_CHECK)){ 
-                    GatherEUMInfo eum1=new GatherEUMInfo(access,lc.getApplication(),lcItem.getMin(),lcItem.getMin24(),lcItem.getMin48(),2);
-                    eum.add(eum1);
-                    execThreads.add(new Thread(eum1));
-                }
-                    
             }
         }
         
-        for(Thread th: execThreads) th.start();
-        
-        
-        try{
-            Thread.sleep(2000);
-            for(Thread th: execThreads) th.join();
-            
-        }catch(Exception e){
-            logger.log(Level.WARNING, new StringBuilder().append("Exception ").append(e.getMessage()).toString());
+        ThreadExecutor threadExec=new ThreadExecutor(2);
+         for(LoadCheck lc:loadCheckList){
+             threadExec.getExecutor().execute(lc);
+         }
+         
+         threadExec.getExecutor().shutdown();
+         threadExec.shutdown();
+   
+
+    }
+
+    public ArrayList<LoadCheck> getLoadCheckList() {
+        return loadCheckList;
+    }
+
+    public void setLoadCheckList(ArrayList<LoadCheck> loadCheckList) {
+        this.loadCheckList = loadCheckList;
+    }
+    
+    private void setApplications(){
+        apps=access.getApplications();
+    }
+    
+    private Application getApplication(String name){
+        Application _app=null;
+        for(Application app:apps.getApplications()){
+            if(app.getName().equals(name)) _app=app;
+            if(name.equals(Integer.toString(app.getId()))) _app=app;
         }
+        
+        return _app;
     }
     
     public String printData(){
