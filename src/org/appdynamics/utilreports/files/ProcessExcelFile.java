@@ -17,10 +17,17 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFFont;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Hyperlink;
+import org.apache.poi.ss.usermodel.CellStyle;
 
 
 import java.util.logging.Logger;
 import java.util.logging.Level;
+import org.apache.poi.ss.usermodel.IndexedColors;
+
 
 /**
  *
@@ -30,6 +37,7 @@ public class ProcessExcelFile {
     private static Logger logger=Logger.getLogger(ProcessExcelFile.class.getName());
     private ArrayList<GatherLoadCheck> loadChecks=new ArrayList<GatherLoadCheck>();
     private String fileName;
+    private CellStyle hyperLinkStyle;
     
     public ProcessExcelFile(ArrayList<GatherLoadCheck> loadChecks, String fileName){
         this.loadChecks=loadChecks;
@@ -39,19 +47,26 @@ public class ProcessExcelFile {
     public void init(){
         
         XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet tableContents = workbook.createSheet("Table Of Contents");
         //logger.log(Level.INFO,"Start excel sheet.");
+        int count=0;
+        
         for(GatherLoadCheck glc:loadChecks){
             //String app=glc.getLc().getApplication();
             //Create a blank sheet
+            
             for(LoadCheck lc:glc.getLoadCheckList()){
                 //logger.log(Level.INFO,new StringBuilder().append("Sheet Name ").append(lc.getSheetName()).append(", ").append(lc.getAppName()).toString());
                 XSSFSheet _sheet = workbook.createSheet(new StringBuilder().append(lc.getSheetName()).append(AppDUtilReportS._U).append(lc.getAppId()).toString());
                 processCheck(_sheet,lc);
+                //
+                addToTableOfContents(tableContents,lc,count);
+                count++;
             }
 
 
         }
-        
+        tableContents.autoSizeColumn(1);
         try
         {
             //Write the workbook in file system
@@ -67,6 +82,38 @@ public class ProcessExcelFile {
         {
             e.printStackTrace();
         }
+    }
+    
+    private void setUpHyperLink(XSSFWorkbook wb){
+        Font hFont=wb.createFont();
+        hFont.setUnderline(Font.U_SINGLE);
+        hFont.setColor(IndexedColors.BLUE.getIndex());
+        hyperLinkStyle=wb.createCellStyle();
+        hyperLinkStyle.setFont(hFont);
+    }
+    private void addToTableOfContents(XSSFSheet xsf, LoadCheck lc, int row){
+      
+        if(row == 0){
+            //Create the header
+            Row headerRow = xsf.createRow(0);
+            Cell cell_ =headerRow.createCell(1);cell_.setCellValue("Application Name - [Check Type]");
+            setUpHyperLink(xsf.getWorkbook());
+        }
+        int newRow = row + 1;
+        
+        Row headerRow = xsf.createRow(newRow);
+        //Create the number
+        headerRow.createCell(0).setCellValue(newRow);
+        
+        Cell cell_=headerRow.createCell(1);
+        
+        CreationHelper createHelper = xsf.getWorkbook().getCreationHelper();
+        Hyperlink link = createHelper.createHyperlink(Hyperlink.LINK_DOCUMENT);
+        link.setAddress(new StringBuilder().append("'").append(lc.getSheetName()).append(AppDUtilReportS._U).append(lc.getAppId()).append("'!A1").toString());
+        //link.setLabel(new StringBuilder().append(lc.getSheetName()).append(AppDUtilReportS._U).append(lc.getAppName()).toString());
+        cell_.setCellValue(new StringBuilder().append(lc.getAppName()).append(" - [").append(lc.getSheetName()).append("]").toString());
+        cell_.setHyperlink(link);
+        cell_.setCellStyle(hyperLinkStyle);
     }
     
     private void processCheck(XSSFSheet xsf, LoadCheck lc){
@@ -130,6 +177,8 @@ public class ProcessExcelFile {
             
         }
         
+        for(int i =0; i < 4;i++)
+            xsf.autoSizeColumn(i);
     }
     private void processBT(XSSFSheet xsf, GatherBTInfo bt, String app){
         //First row is the application
@@ -211,6 +260,9 @@ public class ProcessExcelFile {
             cell_3 = headerRow.createCell(cellIndex);cell_3.setCellValue(dBt.getTierName());
             cellIndex=0;
         }
+        
+        for(int i =0; i < 4;i++)
+            xsf.autoSizeColumn(i);
     }
     
     private void processBE(XSSFSheet xsf, GatherBKInfo bk, String app){
@@ -283,6 +335,9 @@ public class ProcessExcelFile {
             cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(bk.getNormalBK().get(dBt));
             cellIndex=0;
         }
+        
+        for(int i =0; i < 4;i++)
+            xsf.autoSizeColumn(i);
     }
     
     private void processEUM(XSSFSheet xsf, GatherEUMInfo eum, String app){
@@ -355,6 +410,9 @@ public class ProcessExcelFile {
             cell_2 = headerRow.createCell(cellIndex);cell_2.setCellValue(eum.getNormalEUM().get(dBt));
             cellIndex=0;
         }
+        
+        for(int i =0; i < 4;i++)
+            xsf.autoSizeColumn(i);
     }
     
     private String getDate(long end){

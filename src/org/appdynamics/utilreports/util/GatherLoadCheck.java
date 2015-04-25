@@ -97,7 +97,7 @@ public class GatherLoadCheck {
             }
         }
         
-        ThreadExecutor threadExec=new ThreadExecutor(2);
+        ThreadExecutor threadExec=new ThreadExecutor(1);
          for(LoadCheck lc:loadCheckList){
              threadExec.getExecutor().execute(lc);
          }
