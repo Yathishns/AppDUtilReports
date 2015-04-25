@@ -134,7 +134,7 @@ public class CheckAll  implements Runnable{
     }
     
     private void setupNothingReturned(){
-        if(base.isEmpty())base.add(new QInfo("Nothing returned", "Nothing retunred"));
+        if(base.isEmpty())base.add(new QInfo("Nothing returned", "Nothing returned"));
     }
     
     private void getAllRollUpValues(MetricDatas mds){
