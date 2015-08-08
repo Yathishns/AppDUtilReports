@@ -11,6 +11,7 @@ package org.appdynamics.utilreports.conf;
 public class QInfo {
     private String name;
     private String tierName;
+    private String type;
     private long value=-2,oldValue=-2;
     private int attemptNum=0;
     private boolean passed=false;
@@ -22,6 +23,12 @@ public class QInfo {
     public QInfo(String name, String tierName){
         this.name=name;
         this.tierName=tierName;
+    }
+    
+    public QInfo(String name, String tierName, String type){
+        this.name=name;
+        this.tierName=tierName;
+        this.type=type;
     }
 
     public boolean isPassed() {
@@ -72,6 +79,14 @@ public class QInfo {
 
     public void setOldValue(long oldValue) {
         this.oldValue = oldValue;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
     
     

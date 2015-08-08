@@ -186,7 +186,7 @@ public class AppDUtilReportS {
     
     
     // Execl File
-    public static final String TIME_RANGE="Time Ranage";
+    public static final String TIME_RANGE="Time Range";
     public static final String APPLICATION_EQ="Application=";
     public static final String REQUEST_COUNTS="Request Counts";
     public static final String LAST_4_HOURS="Last 4 Hours";

@@ -14,6 +14,7 @@ import org.appdynamics.crypto.*;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  *
@@ -62,6 +63,7 @@ public class ProcessXMLConfig {
 
     public void processOutputs(){
         Outputs outs=appDHC.getHcLoadChecks().getOutputs();
+        Calendar cal=Calendar.getInstance();
         for(Output out:outs.getOutpus()){
             
             if(out.getType().equals(AppDUtilReportS.OUTPUT_TYPE_STDOUT) 
@@ -70,12 +72,22 @@ public class ProcessXMLConfig {
             //logger.log(Level.INFO,"\n\nCreating EXCEL sheet");
             if(out.getType().equals(AppDUtilReportS.OUTPUT_TYPE_FILE) && out.getFormat().equals(AppDUtilReportS.OUTPUT_FORMAT_EXCEL)){
                 //This is when we are going to write the file.
-                ProcessExcelFile excelFile = new ProcessExcelFile(loadChecks, out.getFile());
+                //ProcessExcelFile excelFile = new ProcessExcelFile(loadChecks, out.getFile());
+                ProcessExcelFile excelFile = new ProcessExcelFile(loadChecks, addDateToFile(out.getFile()) );
                 excelFile.init();
             }
         }
     }
     
-    
+    public String  addDateToFile(String fileName){
+        Calendar cal=Calendar.getInstance();
+        if(fileName.contains(".")){
+            fileName=fileName.substring(0,fileName.indexOf('.'));
+        }
+        
+        return new StringBuilder().append(fileName).append("_")
+                .append(cal.get(Calendar.YEAR)).append(cal.get(Calendar.MONTH)).append((cal.get(Calendar.DAY_OF_MONTH)+1))
+                .append(".xlsx").toString();
+    }
     
 }

@@ -9,6 +9,8 @@ import org.appdynamics.appdrestapi.data.MetricDatas;
 import org.appdynamics.appdrestapi.data.MetricData;
 import org.appdynamics.appdrestapi.data.Tiers;
 import org.appdynamics.appdrestapi.data.Tier;
+import org.appdynamics.appdrestapi.data.BusinessTransactions;
+import org.appdynamics.appdrestapi.data.BusinessTransaction;
 import org.appdynamics.utilreports.conf.QInfo;
 
 import java.util.ArrayList;
@@ -33,6 +35,7 @@ public class CheckAll  implements Runnable{
     private long start,end;
     private String appId;
     private RESTAccess access;
+    private BusinessTransactions bts;
     
     private ArrayList<QInfo> retries=new ArrayList<QInfo>(),base=new ArrayList<QInfo>(), myList=new ArrayList<QInfo>(),newBase=new ArrayList<QInfo>();
     
@@ -58,7 +61,8 @@ public class CheckAll  implements Runnable{
         setTimeRange();
         switch(queryIndex){
                 case 5: 
-                    getAllRollUpValues(access.getRESTBTMetricQuery(5, appId, "*", "*", start, end, true));
+                    bts=access.getBTSForApplication(appId);
+                    getAllRollUpValues(access.getRESTBTMetricQuery(5, appId, "*", "*", start, end, true)); 
                     break;
                 case 1:
                     getAllRollUpValues(access.getRESTBackendMetricQuery(1, appId, "*", start, end, true));         
@@ -78,7 +82,9 @@ public class CheckAll  implements Runnable{
         
             try{Thread.sleep(130);}catch(Exception e){}
 
-        logger.log(Level.INFO, new StringBuilder().append("Completed the check for ").append(name).append(" queryNumber ").append(queryIndex).append(" with the base of ").append(base.size()).toString());
+        logger.log(Level.INFO, new StringBuilder().append("Completed the check for ").append(name)
+                .append(" queryNumber ").append(queryIndex).append(" with the base of ")
+                .append(base.size()).toString());
     }
     
     /*
@@ -282,13 +288,25 @@ public class CheckAll  implements Runnable{
                 case 5: 
                     if(path.length > 3){
                         qInfo = new QInfo(path[3],path[2]);
+                        //logger.log(Level.INFO,new StringBuilder().append("\tOUTTER:Checking on ").append(path[3]).append(" and ").append(path[2]).toString());
+                        if(bts != null){
+                            for(BusinessTransaction bt:bts.getBusinessTransactions()) {
+                               // logger.log(Level.INFO,new StringBuilder().append("\tINNER:Checking on ").append(bt.getName()).append(" and ").append(bt.getTierName()).toString());
+                                if(bt.getName().equalsIgnoreCase(path[3]) && bt.getTierName().equalsIgnoreCase(path[2])) 
+                                    qInfo=new QInfo(path[3],path[2],bt.getEntryPointType());
+                            }
+                        }else{
+                            logger.log(Level.INFO,new StringBuilder().append("BTS is null ").toString());
+                        }
                     }else{
                         logger.log(Level.WARNING,new StringBuilder().append("Failed to part the metric name for query index 5 ").append(metricPath).toString());
                     }
                     break;
-                case 1:
+                case 1: // 
                     if(path.length > 2){
-                        qInfo = new QInfo(path[1],"");
+                        String name=path[1];
+                        if(name.startsWith("Discovered backend call - ")) name=name.substring(26);
+                        qInfo = new QInfo(name,"");
                     }else{
                         logger.log(Level.WARNING,new StringBuilder().append("Failed to part the metric name for query index 1 ").append(metricPath).toString());
                     }       

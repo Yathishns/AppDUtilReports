@@ -10,11 +10,7 @@ import org.appdynamics.utilreports.conf.*;
 import org.appdynamics.utilreports.logging.JLog_Formatter;
 
 
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Formatter;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.logging.*;
 import java.util.Calendar;
 
 
@@ -47,12 +43,12 @@ public class ControllerHC {
         logger.log(Level.INFO,new StringBuilder().append("Parsing XML file ")
                 .append(AppDUtilReportS.CFG_FILE_V).append(".").toString());
         
+        
         ReadConfig cfg = new ReadConfig(AppDUtilReportS.CFG_FILE_V);
-        //logger.log(Level.INFO,"Processing excel file...");
+       
         ProcessXMLConfig process=new ProcessXMLConfig(cfg.getReport());
         try{
             process.init();
-
         }catch(Exception e){
             logger.log(Level.SEVERE,e.getMessage());
         }

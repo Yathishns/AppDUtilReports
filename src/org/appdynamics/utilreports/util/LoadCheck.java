@@ -56,7 +56,7 @@ public class LoadCheck implements Runnable{
                 QInfo qInfo;
                 for(BusinessTransaction bt:bts.getBusinessTransactions()){
                     //logger.log(Level.INFO,new StringBuilder().append("Found BT ").append(bt.getName()).toString());
-                    if(!bt.getName().equals("_APPDYNAMICS_DEFAULT_TX_")) base.add(new QInfo(bt.getName(),bt.getTierName()));
+                    if(!bt.getName().equals("_APPDYNAMICS_DEFAULT_TX_")) base.add(new QInfo(bt.getName(),bt.getTierName(),bt.getEntryPointType()));
                 }
                 break;
             case 1:
