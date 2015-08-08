@@ -72,7 +72,8 @@ public class BackupConfiguration {
             autoExp.append("Application|Auto|").append(app.getName()).append("||").append(name).append(BackupConfigS.XML_END).append("\n");
             // Let's get the app stuff for <AppName>_Global_Auto.xml and <AppName>_Global_POJO.xml
             int count=0;
-            for(String val: s.JAVA_CUSTOM_MATCHES){
+            for(int i=0 ; i < 1;i++){
+                String val=s.JAVA_CUSTOM_MATCHES[i];
                 name=new StringBuilder().append(app.getName()).append("_").append(val).toString();
                 appVal=access.getRESTCustomJavaExport(count, app.getName(), null);
                 if(appVal != null && appVal.length() > 100){ 
@@ -84,7 +85,8 @@ public class BackupConfiguration {
             }
             
             count=0;
-            for(String val: s.DOTNET_CUSTOM_MATCHES){
+            for(int i=0 ; i < 1;i++){
+                String val= s.DOTNET_CUSTOM_MATCHES[i];
                 name=new StringBuilder().append(app.getName()).append("_").append(val).toString();
                 appVal=access.getRESTCustomDotNetExport(count, app.getName(), null);
                 if(appVal != null && appVal.length() > 100){
@@ -104,7 +106,8 @@ public class BackupConfiguration {
                     autoExp.append("Tier|Auto|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
                     // Let's get the app stuff for <AppName>_Global_Auto.xml and <AppName>_Global_POJO.xml
                     count=0;
-                    for(String val: s.JAVA_CUSTOM_MATCHES){
+                    for(int i=0 ; i < 1;i++){
+                        String val= s.JAVA_CUSTOM_MATCHES[i];
                         name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
                         appVal=access.getRESTCustomJavaExport(count, app.getName(),tier.getName(), null);
                         if(appVal != null && appVal.length() > 100){
@@ -116,9 +119,34 @@ public class BackupConfiguration {
                     }
 
                     count=0;
-                    for(String val: s.DOTNET_CUSTOM_MATCHES){
+                    for(int i=0 ; i < 1;i++){
+                        String val= s.DOTNET_CUSTOM_MATCHES[i];
                         name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
                         appVal=access.getRESTCustomDotNetExport(count, app.getName(),tier.getName(), null);
+                        if(appVal != null && appVal.length() > 100){
+                            writeFile(name,fileDateName,appVal,3);
+                             customMatch.append("Tier|DOTNET_CUSTOM|").append(val).append("|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
+                        }
+                        count+=2;
+                        sleepIt(1000);
+                    }
+                    count=0;
+                    for(int i=0 ; i < 1;i++){
+                        String val= s.NODEJS_CUSTOM_MATCHES[i];
+                        name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
+                        //appVal=access.getRESTCustomDotNetExport(count, app.getName(),tier.getName(), null);
+                        if(appVal != null && appVal.length() > 100){
+                            writeFile(name,fileDateName,appVal,3);
+                             customMatch.append("Tier|DOTNET_CUSTOM|").append(val).append("|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
+                        }
+                        count+=2;
+                        sleepIt(1000);
+                    }
+                    count=0;
+                    for(int i=0 ; i < 1;i++){
+                        String val= s.PHP_CUSTOM_MATCHES[i];
+                        name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
+                        //appVal=access.getRESTCustomDotNetExport(count, app.getName(),tier.getName(), null);
                         if(appVal != null && appVal.length() > 100){
                             writeFile(name,fileDateName,appVal,3);
                              customMatch.append("Tier|DOTNET_CUSTOM|").append(val).append("|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
@@ -144,10 +172,10 @@ public class BackupConfiguration {
         writeFile("HEALTHRULES_PROPS",fileDateName,healthRules.toString(),2);
         
         int i = 0;
-        int limit=200;
+        int limit=300;
         while(limit > i){
             i++;
-            logger.info(new StringBuilder().append("Working on dashboard index: ").append(i).append(".").toString());
+            //logger.info(new StringBuilder().append("Working on dashboard index: ").append(i).append(".").toString());
             Dashboard rep = access.getDashboardExportById(i);
             if(rep.isExists()){
                  logger.info(new StringBuilder().append("Working on export of dashboard: ").append(rep.getName()).toString());

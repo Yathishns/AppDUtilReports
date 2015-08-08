@@ -5,6 +5,7 @@
     <property name="lib.dir"			value="${basedir}/lib"/> 
     <property name="exec.lib.dir"		value="${basedir}/execLib"/> 
     <property name="poi.lib.dir"		value="${basedir}/poiLibs"/>
+    <property name="base.folder"		value="AppD_folder"/>
 
     <!-- These are going to be the specific project tools -->
 
@@ -19,11 +20,15 @@
     <property name="AppDExtract.version"     value="1.0.2"/>
     <property name="hloadcheck.main"            value="org.appdynamics.utilreports.ControllerHC"/>
     <property name="AppDBackupConfiguration.main" value="org.appdynamics.backup.BackupConfiguration"/>
+    <property name="LicenseCheck.main" value="org.appdynamics.licenseCheck.LicenseCheck"/>
 
     <property name="AppDynamicsHLoadCheck.basename" value="AppDynamicsHLoadCheck"/>
     <property name="AppDBackupConfiguration.basename" value="AppDBackupConfiguration"/>
+    <property name="AppDLicenseCheck.basename" value="AppDLicenseCheck"/>
+
     <property name="AppDynamicsHLoadCheck.version"     value="1.0.4"/>
     <property name="AppDBackupConfiguration.version" value="0.9.0"/>
+    <property name="AppDLicenseCheck.version" value="0.9.0"/>
 
     <loadproperties srcFile="one_time_git.properties"/>    
 
@@ -105,6 +110,17 @@
             <include name="org/appdynamics/backup/util/*.class"/>
           </fileset>
       </jar>
+      <jar jarfile="${build.dir}/${AppDLicenseCheck.basename}_${AppDLicenseCheck.version}.jar">
+	<manifest>
+		<attribute name="Main-Class" value="${AppDLicenseCheck.main}"/>
+	</manifest>
+	<fileset dir="${build.dir}">
+	   <include name="org/appdynamics/licenseCheck/LicenseCheck.class"/>
+	   <include name="org/appdynamics/licenseCheck/util/*.class"/>
+	   <include name="org/appdynamics/licenseCheck/resources/*.class"/>
+	   <include name="org/appdynamics/licenseCheck/action/*.class"/>
+	</fileset>
+      </jar>
 
       <jar jarfile="${build.dir}/${AppDExtract.basename}.jar">
           <manifest>
@@ -129,6 +145,8 @@
               tofile="${exec.lib.dir}/${AppDynamicsHLoadCheck.basename}_${AppDynamicsHLoadCheck.version}.jar"/>
         <copy file="${build.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar" 
               tofile="${exec.lib.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar"/>
+        <copy file="${build.dir}/${AppDLicenseCheck.basename}_${AppDLicenseCheck.version}.jar" 
+              tofile="${exec.lib.dir}/${AppDLicenseCheck.basename}_${AppDLicenseCheck.version}.jar"/>
 
        <!-- Extract Code -->
        <delete file="${exec.lib.dir}/${AppDExtract.basename}*"/>
