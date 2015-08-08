@@ -37,19 +37,26 @@ This will create a directory called execLib with all of the necessary libraries 
 Pre-Execution:
 --------------
 
+####ControllerHC
 Please use the example configuration xml file provided in src/org/appdynamics/utilreports/conf/HCExample.xml and copy it to the project base directory. Using the AppDSimpleCrypto tool encrypt the password for the REST user that you are going to use. Edit the HCExample.xml and update it with the proper information, using the encrypted password and other needed information.
+
+####LicenseCheck
+Please use the example configuration xml file provided in src/org/appdynamics/licenseCheck/resources/example_config.xml. If the output is being sent through email and the mail server requires authentication then you will need to use the AppDSimpleCrypto to hash the password for the mail server as well as the AppDynamics user. Once the authentication is properly set you can create the base file by running the tool with the '-b <FILE>' to create the initial base file. The format of the base file is AppDynamics Application, AppDynamics Tier, number of application agents and number of machine agents. The user can test the execution of email by providing the '-m' option on the configuration file has been properly filled in. The second method of notification is posting a REST event into AppDynamics. Just provide the AppDynamics application name and an event with the information will be sent.
+   
 
 Execution:
 ----------
 
-###ControlerHC
+####ControllerHC
 Usage:
 
 java -cp "execLib/*" org.appdynamics.utilreports.ControllerHC -C HCExample.xml
 
-###LicenseCheck
+
+####LicenseCheck
 Usage:
 java -cp "execLib/*" org.appdynamics.licenseCheck.LicenseCheck -C LCExample.xml [-b <FILEPATH>] [-m]
+
 
 Support:
 --------
