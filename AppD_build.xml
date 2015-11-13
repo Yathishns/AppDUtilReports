@@ -98,6 +98,11 @@
             <include name="org/appdynamics/utilreports/logging/*.class"/>
             <include name="org/appdynamics/utilreports/files/*.class"/>
             <include name="org/appdynamics/utilreports/resources/*.class"/>
+            <include name="org/appdynamics/markH/*.class"/>
+            <include name="org/appdynamics/markH/file/*.class"/>
+            <include name="org/appdynamics/markH/data/*.class"/>
+            <include name="org/appdynamics/markH/util/*.class"/>
+            <include name="org/appdynamics/markH/resources/*.class"/>
           </fileset>
       </jar>
       <jar jarfile="${build.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar">

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<mark_historical>
+    <server-config> 
+        <controller Port="443" useSSL="true">controller.saas.appdynamics.com</controller>
+        <account>customer1</account>
+        <user>admin</user>
+        <password>cikendkskFrNxlAN+s+BsL+8V7nKGLo5H</password>
+        <server-log maxNumber="4" maxSize="30">/tmp/server.log</server-log>
+    </server-config>
+    
+    <!-- You can have one or more application -->
+    <application name="53" hours_to_check="2" min_count="1"> 
+        <!--  
+            The search has a hierarchy that can be controlled by selecting the tier, then the node.
+
+            check_type can have the following values: 
+            contains, startsWith, endsWith, regex, any   
+        -->
+        <tier check_type="any" name_value="*"> <!--   -->
+            <node check_type="startsWith" name_value="cf_"/>
+            <node check_type="startsWith" name_value="awsebs"/>
+            <node check_type="startsWith" name_value="ip"/>
+        </tier>
+    </application>
+</mark_historical>
