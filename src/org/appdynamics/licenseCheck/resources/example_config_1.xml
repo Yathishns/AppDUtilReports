@@ -1,0 +1,24 @@
+<appD-LC-report>
+    <server-config> 
+        <controller Port="8090" useSSL="false">10.1.50.140/</controller>
+        <account>customer1</account>
+        <user>gsolorzano</user>
+        <password>gRP/n0ot/iyznP0yhGBRif1x52ho+1He</password>
+    </server-config>
+        
+    <info-check check-last-hours="1">
+        <output type="event" format="text">BDR</output>
+        <output type="email" format="text">gilbert.solorzano@appdynamics.com"</output>
+        <input type="file" format="csv">/Users/gilbert.solorzano/BaseCode/AppDUtilReports/src/org/appdynamics/licenseCheck/resources/Base.csv</input>
+    </info-check> 
+    
+    <mail-info>
+        <mail-auth>false</mail-auth>
+        <mail-user>appd@appdynamics.com</mail-user>
+        <mail-passwd></mail-passwd>
+        <mail-host>localhost</mail-host>
+        <mail-port>25</mail-port>
+    </mail-info>
+    
+</appD-LC-report>
+        

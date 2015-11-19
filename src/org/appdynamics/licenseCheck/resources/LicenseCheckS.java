@@ -11,6 +11,10 @@ package org.appdynamics.licenseCheck.resources;
  */
 public class LicenseCheckS {
     
+    public static final int VERSION_MAJOR=0;
+    public static final int VESION_MINOR=9;
+    public static final int VERSION_BUILD=0;
+    
     public static final String E_=" = ";
     public static final String L0="\n";
     public static final String SOLUTION_NAME="License Check";
