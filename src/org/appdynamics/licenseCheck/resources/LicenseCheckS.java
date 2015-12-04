@@ -26,6 +26,10 @@ public class LicenseCheckS {
     public static final String NOTFICATIONS="Notifications";
     public static final String BASE="Base";
     public static final String CHECK_LAST_HOURS="check-last-hours";
+    public static final String CHECK_UNIT_TYPE="check-unit-type";
+    public static final String VALUE="value";
+    public static final String CHECK_TYPE="check-type"; // too-few, too-many, both
+    public static final String LICENSE_LIMIT="license-limit";
     
     /*
         <info-check>

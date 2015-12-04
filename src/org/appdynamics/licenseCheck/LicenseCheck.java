@@ -88,14 +88,14 @@ public class LicenseCheck {
         
          
         
-        System.out.println(msgs);
+        logger.log(Level.INFO,msgs.toString());
         if(cfg.getReport().getInfoCheck().isEmail()){ 
             new SendMail(cfg.getReport().getMailInfo(),cfg.getReport().getInfoCheck().getEmail().getName(),msgs.toString());
         }
         if(cfg.getReport().getInfoCheck().isRest()){
             SendEvent.send(xmlConfig.getAccess(), cfg.getReport().getInfoCheck().getRest().getName(), msgs.toString());
         }
-        System.out.println("\nDone");
+        logger.log(Level.INFO,"\nDone");
         
         long end=(Calendar.getInstance().getTimeInMillis() - start)/1000;
         logger.log(Level.INFO,"Completed the execution in {0} seconds.",end);
