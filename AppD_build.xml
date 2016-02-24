@@ -25,10 +25,12 @@
     <property name="AppDynamicsHLoadCheck.basename" value="AppDynamicsHLoadCheck"/>
     <property name="AppDBackupConfiguration.basename" value="AppDBackupConfiguration"/>
     <property name="AppDLicenseCheck.basename" value="AppDLicenseCheck"/>
+    <property name="AppDMarkH.basename" value="AppDMarkH"/>
 
     <property name="AppDynamicsHLoadCheck.version"     value="1.0.4"/>
     <property name="AppDBackupConfiguration.version" value="0.9.0"/>
     <property name="AppDLicenseCheck.version" value="0.9.0"/>
+    <property name="AppDMarkH.version" value="0.9.0"/>
 
     <loadproperties srcFile="one_time_git.properties"/>    
 
@@ -105,6 +107,7 @@
             <include name="org/appdynamics/markH/resources/*.class"/>
           </fileset>
       </jar>
+
       <jar jarfile="${build.dir}/${AppDBackupConfiguration.basename}_${AppDBackupConfiguration.version}.jar">
           <manifest>
               <attribute name="Main-Class" value="${AppDBackupConfiguration.main}"/>

@@ -116,7 +116,7 @@ public class ProcessXML {
              start1++;
              if(start1 > maxSend){
                  logger.log(Level.INFO,"Marking the following node ids: " + sendBuff.toString());
-                 //access.postRESTMarkNodeHistorical(sendBuff.toString());
+                 access.postRESTMarkNodeHistorical(sendBuff.toString());
                  sendBuff=new StringBuilder();
                  start1=0;
              }
