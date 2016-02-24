@@ -22,11 +22,14 @@ and open the template in the editor.
 
             check_type can have the following values: 
             contains, startsWith, endsWith, regex, any   
+            
+            There are two levels of checks the tier check, this define if the tier's nodes should be checked.
+            The second check will compare the nodes name against the specific check.
         -->
         <tier check_type="any" name_value="*"> <!--   -->
-            <node check_type="startsWith" name_value="cf_"/>
+            <node check_type="startsWith" name_value="aws_"/>
             <node check_type="startsWith" name_value="awsebs"/>
-            <node check_type="startsWith" name_value="ip"/>
+            <node check_type="startsWith" name_value="ops"/>
         </tier>
     </application>
 </mark_historical>

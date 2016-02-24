@@ -62,7 +62,7 @@ public class AppDMH {
             logger.log(Level.SEVERE,new StringBuilder().append("Exception occurred: ").append(e.getMessage()).toString());
         }
         
-        logger.log(Level.INFO, "Completed the historical process in " + ((Calendar.getInstance().getTimeInMillis() - start)/1000) + " seconds.");
+        logger.log(Level.INFO, "Completed the mark historical process in " + ((Calendar.getInstance().getTimeInMillis() - start)/1000) + " seconds.");
         
         
         

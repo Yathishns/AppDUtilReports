@@ -7,9 +7,10 @@ package org.appdynamics.markH.util;
 
 import org.appdynamics.markH.data.*;
 
-import java.util.logging.Level;
+
 import org.appdynamics.appdrestapi.RESTAccess;
 import org.appdynamics.appdrestapi.data.*;
+import org.appdynamics.appdrestapi.util.MyCalendar;
 import org.appdynamics.utilreports.conf.*;
 import org.appdynamics.markH.data.ApplicationCheck;
 
@@ -82,9 +83,12 @@ public class ProcessXML {
             //nodesToCheck=sortNodes(nodesToCheck);
             markedNodes=checkUpTime(nodesToCheck,app);
             processNodes(markedNodes);
+        }else{
+            logger.log(Level.SEVERE,"Error occurred retrieving the nodes and tiers from the controller, exiting");
         }
     }
     
+    /*
     private Set<Node>  sortNodes(Set<Node> nodes){
         ArrayList<Node> _nodes = new ArrayList<Node>(nodes);
         Collections.sort(_nodes, new Comparator<Node>(){
@@ -97,6 +101,7 @@ public class ProcessXML {
         map.addAll(_nodes);
         return map;
     }
+    */
     
     private void processNodes(Set<Integer> nodes){
         int start1=0;
@@ -111,7 +116,7 @@ public class ProcessXML {
              start1++;
              if(start1 > maxSend){
                  logger.log(Level.INFO,"Marking the following node ids: " + sendBuff.toString());
-                 access.postRESTMarkNodeHistorical(sendBuff.toString());
+                 //access.postRESTMarkNodeHistorical(sendBuff.toString());
                  sendBuff=new StringBuilder();
                  start1=0;
              }
@@ -120,8 +125,8 @@ public class ProcessXML {
     
     private Set<Integer> checkUpTime(Set<Node> nodes, ApplicationCheck app){
         Set<Integer> markedNodes = new HashSet<Integer>();
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.SECOND,0);cal.set(Calendar.MINUTE, 0);cal.set(Calendar.MILLISECOND, 0);
+        Calendar cal = MyCalendar.getCalendar();//Calendar.getInstance();
+        cal.set(Calendar.MINUTE, 0);
         long end = cal.getTimeInMillis();
         cal.add(Calendar.HOUR, (-1*app.getHoursToCheck()));
         long start = cal.getTimeInMillis();
