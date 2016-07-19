@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+
+
+<appD_metric_export>
+    
+    <server-config>
+        <interval>10</interval> 
+        <controller Port="8090" useSSL="false">controller.localdomain.com</controller>
+        <account></account>
+        <user></user>
+        <password></password>
+        <!-- Not used yet -->
+        <server-log maxNumber="" maxSize="">{FULL_PATH}</server-log>
+    </server-config>
+    
+    <metric-output>
+        <log-output logFormat="log2metric" name="default">
+              <!-- maxSize is in mega-bytes -->
+              <metric-log maxNumber="4" maxSize="32">{LogFile Path}</metric-log>
+        </log-output>
+    </metric-output>
+    
+    <!--> This is going tobe a section that should be read multiple times<-->
+    <metric-collections>
+        <eum-collections>
+            <eum-collection metricIndex="" applicationName="">{SITE}</eum-collection>
+        </eum-collections>
+        
+        <general-metric-collections>
+            <tier-collection metricIndex="" applicationName="">{TIER_NAME}</tier-collection>
+            <node-collection metricIndex="" applicationName="" tierName="">{NODE_NAME}</node-collection> 
+        </general-metric-collections>
+    </metric-collections>  
+   
+</appD_metric_export>

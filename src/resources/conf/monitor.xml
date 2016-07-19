@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+To change this template, choose Tools | Templates
+and open the template in the editor.
+-->
+
+<monitor>
+        <name>AppDExtract</name>
+        <type>managed</type>
+        <description>AppDynamics data extract</description>
+        <monitor-configuration></monitor-configuration>
+        <monitor-run-task>
+                <execution-style>periodic</execution-style>
+                <execution-frequency-in-seconds>300</execution-frequency-in-seconds>
+                <name>AppDynamics Data Extraction Run Task</name>
+                <display-name>AppDynamics Data Extraction Task</display-name>
+                <description>AppDynamics Data Extraction Task</description>
+                <type>executable</type>
+                <execution-timeout-in-secs>300</execution-timeout-in-secs>
+                <task-arguments>
+                </task-arguments>
+                <executable-task>
+                	<type>file</type>
+                	<file>execJava.sh</file>
+                </executable-task>
+        </monitor-run-task>
+</monitor>
