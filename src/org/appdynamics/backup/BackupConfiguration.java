@@ -30,6 +30,9 @@ import java.text.SimpleDateFormat;
 public class BackupConfiguration {
     private static Logger logger=Logger.getLogger(BackupConfiguration.class.getName());
     
+    public BackupConfiguration(){
+        // Its up to the developer to setup the needed variables.
+    }
     
     public static void main(String[] args){
         // controller host (-h), controller port (-P), use ssl (-s) , account (-a), user (-u), passwd (-p), directory (-D)
@@ -41,6 +44,10 @@ public class BackupConfiguration {
             System.exit(1);
         }
         
+        init();
+    }
+    
+    public static void init(){
         StringBuilder autoExp=new StringBuilder(),customMatch=new StringBuilder(),healthRules=new StringBuilder();
         // First we get the information to connect
         RESTAccess2 access = new RESTAccess2(BackupConfigS.CONTROLLER_V,BackupConfigS.PORT_V,
