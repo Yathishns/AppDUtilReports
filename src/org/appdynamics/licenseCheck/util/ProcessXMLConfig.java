@@ -85,13 +85,13 @@ public class ProcessXMLConfig {
                 //LicenseCheckS.DEBUG=false;
                // if(app.getName().startsWith("BDR")) LicenseCheckS.DEBUG=true;
                 // Here we grab the node level metrics for the agent and machine agent
-                MetricDatas appMetrics = access.getRESTMetricQuery(0, app.getName(), "*", start, end,true);
-                MetricDatas machineMetrics = access.getRESTMetricQuery(1, app.getName(), "*", start, end);
+                MetricDatas appMetrics = access.getAgentTierAppMetricQuery(0, app.getName(), "*", start, end,true);
+                MetricDatas machineMetrics = access.getAgentTierAppMetricQuery(1, app.getName(), "*", start, end,true);
 
                 // Just one additional check
                 if(appMetrics == null){
                     try{Thread.sleep(1500);}catch(Exception e){}
-                    appMetrics = access.getRESTMetricQuery(0, app.getName(), "*", start, end,true);
+                    appMetrics = access.getAgentTierAppMetricQuery(0, app.getName(), "*", start, end,true);
                 }
                 
                 if(appMetrics != null){
@@ -110,7 +110,7 @@ public class ProcessXMLConfig {
                 
                 if(machineMetrics == null){
                      try{Thread.sleep(1500);}catch(Exception e){}
-                    machineMetrics = access.getRESTMetricQuery(1, app.getName(), "*", start, end,true);
+                    machineMetrics = access.getAgentTierAppMetricQuery(1, app.getName(), "*", start, end,true);
                 }
                 
                 if(machineMetrics != null){

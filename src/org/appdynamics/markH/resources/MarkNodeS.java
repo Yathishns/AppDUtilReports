@@ -10,7 +10,7 @@ package org.appdynamics.markH.resources;
  * @author gilbert.solorzano
  */
 public class MarkNodeS {
-    
+    public static String VERSION="1.0.0";
     public static String CONTROLLER_V="familysearch.saas.appdynamics.com";
     public static String CONTROLLER_PORT_V="443";
     public static String CONTROLLER_USER_V="tam";

@@ -121,6 +121,11 @@ public class ProcessXML {
                  start1=0;
              }
          }
+         // This will cover the list when we have less than 10 available
+         if(start1 > 0 ){
+                 logger.log(Level.INFO,"Marking the following node ids: " + sendBuff.toString());
+                 access.postRESTMarkNodeHistorical(sendBuff.toString());
+         }
     }
     
     private Set<Integer> checkUpTime(Set<Node> nodes, ApplicationCheck app){

@@ -10,7 +10,7 @@ import java.io.FileWriter;
 import org.appdynamics.backup.resources.BackupConfigS;
 import org.appdynamics.backup.util.BackupConfigurationOptions;
 
-import org.appdynamics.appdrestapi.RESTAccess2;
+import org.appdynamics.appdrestapi.RESTAccess;
 import org.appdynamics.appdrestapi.data.*;
 import org.appdynamics.appdrestapi.resources.s;
 
@@ -50,7 +50,7 @@ public class BackupConfiguration {
     public static void init(){
         StringBuilder autoExp=new StringBuilder(),customMatch=new StringBuilder(),healthRules=new StringBuilder();
         // First we get the information to connect
-        RESTAccess2 access = new RESTAccess2(BackupConfigS.CONTROLLER_V,BackupConfigS.PORT_V,
+        RESTAccess access = new RESTAccess(BackupConfigS.CONTROLLER_V,BackupConfigS.PORT_V,
                 BackupConfigS.SSL_V,BackupConfigS.USERNAME_V,BackupConfigS.PASSWD_V,BackupConfigS.ACCOUNT_V);
         //access.setDebugLevel(3);
         String fileDateName = getDateName();
@@ -82,7 +82,7 @@ public class BackupConfiguration {
             for(int i=0 ; i < 1;i++){
                 String val=s.JAVA_CUSTOM_MATCHES[i];
                 name=new StringBuilder().append(app.getName()).append("_").append(val).toString();
-                appVal=access.getRESTCustomJavaExport(count, app.getName(), null);
+                appVal=null;// FIX_IT access.getRESTCustomJavaExport(count, app.getName(), null);
                 if(appVal != null && appVal.length() > 100){ 
                     writeFile(name,fileDateName,appVal,3);
                     customMatch.append("Application|JAVA_CUSTOM|").append(val).append("|").append(app.getName()).append("||").append(name).append(BackupConfigS.XML_END).append("\n");
@@ -95,7 +95,7 @@ public class BackupConfiguration {
             for(int i=0 ; i < 1;i++){
                 String val= s.DOTNET_CUSTOM_MATCHES[i];
                 name=new StringBuilder().append(app.getName()).append("_").append(val).toString();
-                appVal=access.getRESTCustomDotNetExport(count, app.getName(), null);
+                appVal=null;//FIX_IT access.getRESTCustomDotNetExport(count, app.getName(), null);
                 if(appVal != null && appVal.length() > 100){
                     writeFile(name,fileDateName,appVal,3);
                     customMatch.append("Application|DOTNET_CUSTOM|").append(val).append("|").append(app.getName()).append("||").append(name).append(BackupConfigS.XML_END).append("\n");
@@ -116,7 +116,7 @@ public class BackupConfiguration {
                     for(int i=0 ; i < 1;i++){
                         String val= s.JAVA_CUSTOM_MATCHES[i];
                         name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
-                        appVal=access.getRESTCustomJavaExport(count, app.getName(),tier.getName(), null);
+                        appVal=null;// FIX_IT access.getRESTCustomJavaExport(count, app.getName(),tier.getName(), null);
                         if(appVal != null && appVal.length() > 100){
                             writeFile(name,fileDateName,appVal,3);
                             customMatch.append("Tier|JAVA_CUSTOM|").append(val).append("|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
@@ -129,7 +129,7 @@ public class BackupConfiguration {
                     for(int i=0 ; i < 1;i++){
                         String val= s.DOTNET_CUSTOM_MATCHES[i];
                         name=new StringBuilder().append(app.getName()).append("_").append(tier.getName()).append("_").append(val).toString();
-                        appVal=access.getRESTCustomDotNetExport(count, app.getName(),tier.getName(), null);
+                        appVal=null;// FIX_IT access.getRESTCustomDotNetExport(count, app.getName(),tier.getName(), null);
                         if(appVal != null && appVal.length() > 100){
                             writeFile(name,fileDateName,appVal,3);
                              customMatch.append("Tier|DOTNET_CUSTOM|").append(val).append("|").append(app.getName()).append("|").append(tier.getName()).append("|").append(name).append(BackupConfigS.XML_END).append("\n");
@@ -183,7 +183,7 @@ public class BackupConfiguration {
         while(limit > i){
             i++;
             //logger.info(new StringBuilder().append("Working on dashboard index: ").append(i).append(".").toString());
-            Dashboard rep = access.getDashboardExportById(i);
+            Dashboard rep = null; // FIX_IT access.getDashboardExportById(i);
             if(rep.isExists()){
                  logger.info(new StringBuilder().append("Working on export of dashboard: ").append(rep.getName()).toString());
                 writeFile(rep.getName(),fileDateName,rep.getValue(),1);
